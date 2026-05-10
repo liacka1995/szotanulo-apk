@@ -18,7 +18,7 @@ jobs:
           pip install buildozer cython
 
       - name: Accept Android SDK licenses
-        run: yes | /home/runner/.buildozer/android/platform/android-sdk/tools/bin/sdkmanager --licenses
+        run: yes | /home/runner/.buildozer/android/platform/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses
 
       - name: Build APK
         run: |
