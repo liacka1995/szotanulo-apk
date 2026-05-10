@@ -11,18 +11,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build APK using official python-for-android Docker image
-        run: |
-          docker pull ghcr.io/kivy/python-for-android:develop
-          docker run --rm -v ${{ github.workspace }}:/app ghcr.io/kivy/python-for-android:develop \
-            p4a apk \
-              --private /app \
-              --package=hu.szotanulo.ultra \
-              --name "SzotanuloUltra" \
-              --version 1.0 \
-              --bootstrap=sdl2 \
-              --requirements=python3,kivy \
-              --arch armeabi-v7a
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install p4a GitHub Action
+        uses: kivy/python-for-android-action@v1
+        with:
+          command: apk
+          package: hu.szotanulo.ultra
+          name: SzotanuloUltra
+          version: "1.0"
+          requirements: python3,kivy
+          bootstrap: sdl2
+          arch: armeabi-v7a
+          private: .
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
