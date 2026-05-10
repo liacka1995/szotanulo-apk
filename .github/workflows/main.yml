@@ -11,40 +11,32 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install Python 3.10
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
       - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y python3 python3-pip python3-setuptools git zip openjdk-17-jdk unzip
-
-      - name: Install Android SDK
-        run: |
-          mkdir -p $HOME/android-sdk
-          cd $HOME/android-sdk
-          wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
-          unzip commandlinetools-linux-9477386_latest.zip -d cmdline-tools
-          mkdir -p cmdline-tools/latest
-          mv cmdline-tools/cmdline-tools/* cmdline-tools/latest/
-          yes | cmdline-tools/latest/bin/sdkmanager --sdk_root=$HOME/android-sdk "platform-tools" "platforms;android-27" "build-tools;33.0.2" "ndk;25.2.9519653"
+          sudo apt install -y python3-pip python3-setuptools git zip openjdk-17-jdk unzip autoconf automake libtool
 
       - name: Install python-for-android
         run: |
-          pip install python-for-android cython
+          pip install "python-for-android<2024" cython
 
-      - name: Build APK with python-for-android
+      - name: Build APK using python-for-android Docker image
         run: |
-          p4a apk \
-            --private . \
-            --package=hu.szotanulo.ultra \
-            --name "SzotanuloUltra" \
-            --version 1.0 \
-            --bootstrap=sdl2 \
-            --requirements=python3,kivy \
-            --dist_name szotanulo \
-            --arch armeabi-v7a \
-            --sdk-dir $HOME/android-sdk \
-            --ndk-dir $HOME/android-sdk/ndk/25.2.9519653 \
-            --android-api 27 \
-            --ndk-api 21
+          docker pull kivy/python-for-android
+          docker run --rm -v ${{ github.workspace }}:/app kivy/python-for-android \
+            p4a apk \
+              --private /app \
+              --package=hu.szotanulo.ultra \
+              --name "SzotanuloUltra" \
+              --version 1.0 \
+              --bootstrap=sdl2 \
+              --requirements=python3,kivy \
+              --arch armeabi-v7a
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
