@@ -11,27 +11,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
           sudo apt update
-          sudo apt install -y python3 python3-pip python3-setuptools git zip
-          pip install buildozer cython
+          sudo apt install -y python3 python3-pip python3-setuptools git zip openjdk-17-jdk
 
-      - name: Initialize Buildozer
-        run: buildozer init
-
-      - name: Accept Android SDK licenses
-        run: buildozer android accept_sdk_license
-
-      - name: Build APK
+      - name: Install python-for-android
         run: |
-          sed -i 's/title = .*/title = SzotanuloUltra/' buildozer.spec
-          sed -i 's/source.include_exts = .*/source.include_exts = py,csv,json/' buildozer.spec
-          sed -i 's/requirements = .*/requirements = python3,kivy/' buildozer.spec
-          buildozer -v android debug
+          pip install python-for-android cython
+
+      - name: Build APK with python-for-android
+        run: |
+          mkdir dist
+          p4a apk \
+            --private . \
+            --package=hu.szotanulo.ultra \
+            --name "SzotanuloUltra" \
+            --version 1.0 \
+            --bootstrap=sdl2 \
+            --requirements=python3,kivy \
+            --dist_name szotanulo \
+            --arch armeabi-v7a \
+            --sdk-dir $HOME/.local/share/python-for-android/android-sdk \
+            --ndk-dir $HOME/.local/share/python-for-android/android-ndk \
+            --android-api 27 \
+            --ndk-api 21
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: SzotanuloUltra.apk
-          path: bin/*.apk
+          path: **/*.apk
