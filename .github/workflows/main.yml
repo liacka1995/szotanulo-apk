@@ -11,24 +11,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
-      - name: Install system dependencies
+      - name: Build APK using official python-for-android Docker image
         run: |
-          sudo apt update
-          sudo apt install -y python3-pip python3-setuptools git zip openjdk-17-jdk unzip autoconf automake libtool
-
-      - name: Install python-for-android
-        run: |
-          pip install "python-for-android<2024" cython
-
-      - name: Build APK using python-for-android Docker image
-        run: |
-          docker pull kivy/python-for-android
-          docker run --rm -v ${{ github.workspace }}:/app kivy/python-for-android \
+          docker pull ghcr.io/kivy/python-for-android:develop
+          docker run --rm -v ${{ github.workspace }}:/app ghcr.io/kivy/python-for-android:develop \
             p4a apk \
               --private /app \
               --package=hu.szotanulo.ultra \
